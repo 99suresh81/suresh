@@ -1,1 +1,7 @@
 name: build-and-test
+runs:
+  using: "node16"
+  steps:
+    - run: npm ci
+    - run: npm test
+    - run: npm run build
