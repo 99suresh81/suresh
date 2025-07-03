@@ -1,0 +1,58 @@
+name: Playwright Test Suite
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted  # Use a self-hosted runner if you have one, or change to 'ubuntu-latest' for GitHub's hosted runners
+    container:
+      image: mcr.microsoft.com/playwright:v1.30.0-focal  # Use a Playwright Docker image    
+      
+
+    steps:
+    # Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Set up Node.js environment (adjust the version as needed)
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # or whichever version you're using
+
+    # Install dependencies
+    - name: Install dependencies
+      run: |
+        npm install
+
+    # Install Playwright and its dependencies
+    - name: Install Playwright
+      run: |
+        npx playwright install --with-deps
+
+    # Run Playwright tests
+    - name: Run Playwright tests
+      run: |
+        npx playwright test
+
+    # (Optional) Upload test results, e.g., if you want to save artifacts or use a reporting tool
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: playwright-test-results
+        path: test-results/
+
+    # (Optional) Cache dependencies to speed up future builds
+    - name: Cache Node.js modules
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
